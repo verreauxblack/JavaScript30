@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01 JavaScript Drum Kit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f1f1f1;
+        }
+
+        .drum-kit {
+            background-image: url("background.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .keys {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .key {
+            border: .4rem solid black;
+            border-radius: .5rem;
+            margin: 1rem;
+            font-size: 1.5rem;
+            padding: 1rem .5rem;
+            transition: all .07s ease;
+            width: 8rem;
+            text-align: center;
+            color: white;
+            background: rgba(0, 0, 0, 0.4);
+            text-shadow: 0 0 .5rem black;
+            display: inline-flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .playing {
+            transform: scale(1.1);
+            border-color: #ffc600;
+            box-shadow: 0 0 1rem #ffc600;
+        }
+
+        kbd {
+            font-size: 4rem;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .sound {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: .1rem;
+            color: #ffc600;
+            pointer-events: none;
+        }
+
+        .link {
+            position: absolute;
+            bottom: 10vh;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+
+        }
+
+        .link a {
+            color: #ffc600;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .keys {
+                min-height: 80vh;
+            }
+
+            .key {
+                width: 5rem;
+                border-width: .2rem;
+            }
+
+            kbd {
+                font-size: 2rem;
+            }
+
+            .sound {
+                font-size: .6rem;
+            }
+
+            .link {
+                bottom: 2vh !important;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <main class="drum-kit">
+        <section class="keys">
+
+        </section>
+        <section class="clips"></section>
+    </main>
+    <script type="text/javascript">
+        const data = {
+            A: {
+                keyCode: 65,
+                keyTrigger: 'A',
+                name: 'clap',
+            },
+            S: {
+                keyCode: 83,
+                keyTrigger: 'S',
+                name: 'hihat',
+            },
+            D: {
+                keyCode: 68,
+                keyTrigger: 'D',
+                name: 'kick',
+            },
+            F: {
+                keyCode: 70,
+                keyTrigger: 'F',
+                name: 'openhat',
+            },
+            G: {
+                keyCode: 71,
+                keyTrigger: 'G',
+                name: 'boom',
+            },
+            H: {
+                keyCode: 72,
+                keyTrigger: 'H',
+                name: 'ride',
+            },
+            J: {
+                keyCode: 74,
+                keyTrigger: 'J',
+                name: 'snare',
+            },
+            K: {
+                keyCode: 75,
+                keyTrigger: 'K',
+                name: 'tom',
+            },
+            L: {
+                keyCode: 76,
+                keyTrigger: 'L',
+                name: 'tink',
+            }
+        };
+
+        const drumButtonTemplate = (data) => `
+        <div data-key='${data.keyCode}' class="key">
+            <Kbd>${data.keyTrigger}</kbd>
+            <span class="sound">${data.name}</span>
+        </div>`;
+        const audioTemplate = (data) => `<audio data-key='${data.keyCode}' src="sounds/${data.name}.wav" class="clip" preload="auto"></audio>`;
+
+        const keys = document.querySelector('.keys');
+        const audio = document.querySelector('.clips');
+        Object.values(data).forEach(key => {
+            const button = drumButtonTemplate(key);
+            const audioClip = audioTemplate(key);
+            keys.innerHTML += button;
+            audio.innerHTML += audioClip;
+        });
+
+        function credits() {
+            const div = document.createElement('div');
+            div.classList.add('link');
+            div.innerText = 'Created by ';
+            const link = document.createElement('a');
+            link.href = "https://twitter.com/verreauxblack";
+            link.innerHTML = "@verreauxblack";
+            link.target = "_blank";
+            div.appendChild(link);
+            document.querySelector('.drum-kit').appendChild(div);
+        }
+
+        function playing(e) {
+            const audioClip = document.querySelector(`audio[data-key='${e.keyCode || e}']`);
+            const key = document.querySelector(`div[data-key='${e.keyCode || e}']`);
+            if (!audioClip) return;
+            key.classList.add('playing');
+            audioClip.currentTime = 0;
+            audioClip.play();
+        };
+        function removeTransition(e) {
+            if (e.propertyName !== 'transform') return;
+            e.target.classList.remove('playing');
+        }
+        const keyselect = Array.from(document.querySelectorAll('.key'));
+        keyselect.forEach(key => {
+            key.addEventListener('transitionend', removeTransition);
+            key.addEventListener('click', (e) => {
+                let keycode = e.target.dataset.key;
+                playing(keycode);
+            });
+        });
+        window.addEventListener('keydown', playing);
+        credits();
+
+    </script>
+</body>
+
+</html>
